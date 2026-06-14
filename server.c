@@ -1,0 +1,64 @@
+#include <sys/socket.h>
+#include <stdio.h>
+#include <arpa/inet.h>
+#include <poll.h>
+#include <unistd.h>
+#include <stdbool.h>
+
+int main()
+{
+    int sockfd = socket(AF_INET, SOCK_STREAM, 0);
+
+    struct sockaddr address = 
+    {
+        AF_INET,
+        htons(9999),
+        0
+    };
+
+    bind(sockfd, &address, sizeof(address));
+
+    listen(sockfd, 10); //Only the server needs to listen , so on client side i will not have this method
+
+    int clientfd = accept(sockfd, 0, 0);
+
+    // stdin - 0
+    struct pollfd fds[2] = 
+    {
+        {
+            0,
+            POLLIN,
+            0
+        },
+        {
+            clientfd,
+            POLLIN,
+            0
+        }
+    };
+
+    while(true)
+    {
+        char buffer[256] = { 0 };
+
+        poll(fds, 2, 50000);
+
+        if (fds[0].revents & POLLIN)
+        {
+            read(0, buffer, 255);
+            send(clientfd, buffer, 255, 0);
+        }
+
+        if(fds[1].revents & POLLIN) 
+        {
+            if (recv(clientfd, buffer, 255, 0) == 0)
+            {
+                return 0;
+            }
+
+            printf("Client says: %s\n", buffer);
+        }
+    }
+
+    return 0;
+}
