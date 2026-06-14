@@ -18,7 +18,7 @@ int main()
 
     bind(sockfd, &address, sizeof(address));
 
-    listen(sockfd, 10); //Only the server needs to listen , so on client side i will not have this method
+    listen(sockfd, 10);
 
     int clientfd = accept(sockfd, 0, 0);
 
